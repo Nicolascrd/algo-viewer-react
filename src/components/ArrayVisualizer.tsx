@@ -16,7 +16,6 @@ interface IPosition {
   bottom: number;
 }
 interface IArrayVisualizerState {
-  boxPositions: Array<IPosition>;
   arrows: Array<IArrow>;
 }
 interface IArrayVisualizerRefs {}
@@ -33,22 +32,18 @@ class ArrayVisualizer extends React.Component<
   constructor(props: IArrayVisualizerProps) {
     super(props);
     this.state = {
-      boxPositions: [],
       arrows: [],
     };
     this.refArrayCont = React.createRef();
-    this.updateArrows = this.updateArrows.bind(this);
-    this.updateBoxPositions = this.updateBoxPositions.bind(this);
+    this.updateArrowsPosition = this.updateArrowsPosition.bind(this);
     this.generateArrowPosition = this.generateArrowPosition.bind(this);
   }
 
   componentDidMount(): void {
-    this.updateBoxPositions();
-    this.updateArrows();
+    this.updateArrowsPosition();
   }
   componentDidUpdate(): void {
-    this.updateBoxPositions();
-    this.updateArrows();
+    this.updateArrowsPosition();
   }
 
   shouldComponentUpdate(
@@ -80,22 +75,40 @@ class ArrayVisualizer extends React.Component<
         return true;
       }
     }
+    console.log(this.state.arrows, nextState.arrows);
+    if (this.state.arrows.length != nextState.arrows.length) {
+      return true;
+    }
+    for (let i = 0; i < this.state.arrows.length; i++) {
+      if (
+        this.state.arrows[i].start != nextState.arrows[i].start ||
+        this.state.arrows[i].end != nextState.arrows[i].end
+      ) {
+        return true;
+      }
+    }
     return false;
   }
 
-  updateBoxPositions() {
+  updateArrowsPosition() {
+    console.log(
+      "update arrows position",
+      this.props.arrowPositions,
+      this.refArrayCont.current
+    );
     if (!this.props.arrowPositions) {
       return;
     }
-    let leftShift = this.refArrayCont.current?.getBoundingClientRect().left;
+    if (this.refArrayCont.current == undefined) {
+      return;
+    }
+    let leftShift = this.refArrayCont.current.getBoundingClientRect().left;
     if (leftShift == undefined) {
       return;
     }
     let bp = [] as Array<IPosition>;
-    for (let i = 0; i < this.props.arr.length; i++) {
-      let rect = document
-        .getElementById(arrayElID + String(i))
-        ?.getBoundingClientRect();
+    for (let i = 0; i < this.refArrayCont.current.children.length; i++) {
+      let rect = this.refArrayCont.current.children[i].getBoundingClientRect();
       if (!rect) {
         return;
       }
@@ -105,12 +118,6 @@ class ArrayVisualizer extends React.Component<
         bottom: rect.bottom,
       });
     }
-    this.setState({
-      boxPositions: bp,
-    });
-  }
-
-  updateArrows() {
     const res: Array<IArrow> = [];
     if (this.props.arrowPositions == undefined) {
       return;
@@ -124,25 +131,31 @@ class ArrayVisualizer extends React.Component<
       }
       let arrPos = this.generateArrowPosition(
         standardHeight * (index + 1),
-        element
+        element,
+        bp
       ); // index + 1 because we want height > 0 for all arrows
       if (arrPos.height) {
         res.push(arrPos);
       }
     });
+    console.log("res arrows", res);
     this.setState({
       arrows: res,
     });
   }
 
-  generateArrowPosition(height: number, arr: Array<number>) {
+  generateArrowPosition(
+    height: number,
+    arr: Array<number>,
+    bp: Array<IPosition>
+  ) {
     if (arr.length != 2) {
       console.error(
         "Array to generate arrow position should be of length 2 but has length " +
           arr.length
       );
     }
-    let startRec = this.state.boxPositions[arr[0]];
+    let startRec = bp[arr[0]];
     if (!startRec) {
       console.log(
         "Cannot get position of square with id: " + arrayElID + String(arr[0]) // can happen as we need one mount to know position of the boxes and draw arrows
@@ -150,7 +163,7 @@ class ArrayVisualizer extends React.Component<
       return {} as IArrow;
     }
     let start = (startRec.left + startRec.right) / 2;
-    let endRec = this.state.boxPositions[arr[1]];
+    let endRec = bp[arr[1]];
     if (!endRec) {
       console.log(
         "Cannot get position of square with id: " + arrayElID + String(arr[1]) // can happen as we need one mount to know position of the boxes and draw arrows
@@ -173,6 +186,7 @@ class ArrayVisualizer extends React.Component<
   }
 
   render() {
+    console.log("render array visu");
     let arrayJSX = this.props.arr.map((el, ind) => {
       return (
         <div
@@ -209,14 +223,6 @@ class ArrayVisualizer extends React.Component<
             <div className="comments-container">{commentsJSX}</div>
           )}
         </div>
-        <div>{this.state.arrows.length}</div>
-        <button
-          onClick={() =>
-            console.log(this.refArrayCont.current?.getBoundingClientRect().left)
-          }
-        >
-          CLICK
-        </button>
       </React.Fragment>
     );
   }

@@ -7,9 +7,7 @@ interface IArrowsArrayProps {
   arrows: Array<IArrow>;
 }
 
-interface IArrowsArrayState {
-  svgHeight: number;
-}
+interface IArrowsArrayState {}
 
 class ArrowsArray extends React.Component<
   IArrowsArrayProps,
@@ -17,9 +15,6 @@ class ArrowsArray extends React.Component<
 > {
   constructor(props: IArrowsArrayProps) {
     super(props);
-    this.state = {
-      svgHeight: 0,
-    };
     this.points = this.points.bind(this);
   }
 
@@ -33,7 +28,12 @@ class ArrowsArray extends React.Component<
   }
 
   render(): React.ReactNode {
-    
+    let svgHeight =
+      15 + Math.max(...this.props.arrows.map((value) => value.height));
+    if (this.props.arrows.length == 0) {
+      svgHeight = 15;
+    }
+
     let arrowsJSX = this.props.arrows.map((arrow) => (
       <g key={arrow.height}>
         <g
@@ -70,7 +70,7 @@ class ArrowsArray extends React.Component<
         xmlns="http://www.w3.org/2000/svg"
         version="1.1"
         xmlnsXlink="http://www.w3.org/1999/xlink"
-        viewBox={"0 0 600 " + this.state.svgHeight}
+        viewBox={"0 0 600 " + svgHeight}
       >
         {arrowsJSX}
       </svg>

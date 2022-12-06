@@ -1,0 +1,31 @@
+.array-container {
+    display: flex;
+  }
+  .array-el {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80px;
+    height: 80px;
+    border: 1px solid black;
+    margin: 0 10px;
+    box-sizing: border-box;
+  }
+  
+  .highlighted-array-el {
+    border: 1px dotted darkred;
+  }
+  
+  .indice {
+    position: absolute;
+    left: 2px;
+    top: 1px;
+  }
+  .internal-data {
+    margin: auto;
+    text-align: center;
+  }
+  .comments-container {
+    margin: 10px 0 5px 10px;
+  }

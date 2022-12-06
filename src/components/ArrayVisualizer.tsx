@@ -75,7 +75,6 @@ class ArrayVisualizer extends React.Component<
         return true;
       }
     }
-    console.log(this.state.arrows, nextState.arrows);
     if (this.state.arrows.length != nextState.arrows.length) {
       return true;
     }
@@ -91,11 +90,6 @@ class ArrayVisualizer extends React.Component<
   }
 
   updateArrowsPosition() {
-    console.log(
-      "update arrows position",
-      this.props.arrowPositions,
-      this.refArrayCont.current
-    );
     if (!this.props.arrowPositions) {
       return;
     }
@@ -138,7 +132,6 @@ class ArrayVisualizer extends React.Component<
         res.push(arrPos);
       }
     });
-    console.log("res arrows", res);
     this.setState({
       arrows: res,
     });
@@ -186,7 +179,6 @@ class ArrayVisualizer extends React.Component<
   }
 
   render() {
-    console.log("render array visu");
     let arrayJSX = this.props.arr.map((el, ind) => {
       return (
         <div

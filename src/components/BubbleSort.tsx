@@ -25,7 +25,7 @@ class BubbleSort extends React.Component<IBubbleSortProps, IBubbleSortState> {
       indexInsertSort: 0,
       bubbleNumber: 0,
       bubbleNeeded: 0,
-      arrayRawInput: "",
+      arrayRawInput: "", // components updates each time the user types in the input, which is useless
       array: [],
       reachedEnd: false,
       arrowPosition: [],
@@ -110,6 +110,7 @@ class BubbleSort extends React.Component<IBubbleSortProps, IBubbleSortState> {
       bubbleNeeded: arr.length - 1,
       indexInsertSort: 0,
       bubbleNumber: 0,
+      array: arr,
     });
   }
   changeArrayInput(e: React.FormEvent<HTMLInputElement>) {

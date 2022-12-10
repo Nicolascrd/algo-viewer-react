@@ -14,7 +14,6 @@ interface IBubbleSortState {
   arrayRawInput: string;
   array: Array<number>;
   reachedEnd: Boolean;
-  arrowPosition: Array<number>;
   highlightedArray: Array<IArrayElement>;
 }
 
@@ -28,7 +27,6 @@ class BubbleSort extends React.Component<IBubbleSortProps, IBubbleSortState> {
       arrayRawInput: "", // components updates each time the user types in the input, which is useless
       array: [],
       reachedEnd: false,
-      arrowPosition: [],
       highlightedArray: [],
     };
     this.end = this.end.bind(this);
@@ -91,9 +89,19 @@ class BubbleSort extends React.Component<IBubbleSortProps, IBubbleSortState> {
     });
   }
   end() {
-    while (this.state.bubbleNumber < this.state.bubbleNeeded) {
-      this.next();
+    if (this.state.bubbleNeeded == this.state.bubbleNumber) {
+      return;
     }
+    let newArray = this.state.array.slice();
+    newArray.sort((a, b) => a - b);
+
+    this.setState(function (state) {
+      return {
+        bubbleNumber: state.bubbleNeeded,
+        array: newArray,
+        indexInsertSort: 0,
+      };
+    });
   }
   reset() {
     let arr = JSON.parse(testArray);
@@ -152,7 +160,7 @@ class BubbleSort extends React.Component<IBubbleSortProps, IBubbleSortState> {
     }
 
     return (
-      <div>
+      <React.Fragment>
         <div className="buttons">
           <button onClick={this.next} id="next" className="bottom-button">
             Next
@@ -197,7 +205,7 @@ class BubbleSort extends React.Component<IBubbleSortProps, IBubbleSortState> {
             comments={[comment]}
           />
         </div>
-      </div>
+      </React.Fragment>
     );
   }
 }

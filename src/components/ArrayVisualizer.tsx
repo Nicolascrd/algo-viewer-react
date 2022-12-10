@@ -42,51 +42,11 @@ class ArrayVisualizer extends React.Component<
   componentDidMount(): void {
     this.updateArrowsPosition();
   }
-  componentDidUpdate(): void {
-    this.updateArrowsPosition();
-  }
-
-  shouldComponentUpdate(
-    nextProps: Readonly<IArrayVisualizerProps>,
-    nextState: Readonly<IArrayVisualizerState>,
-    nextContext: any
-  ): boolean {
-    if (this.props.arr.length != nextProps.arr.length) {
-      return true;
+  componentDidUpdate(prevProps: IArrayVisualizerProps): void {
+    const p = this.props;
+    if (this.props != prevProps) {
+      this.updateArrowsPosition();
     }
-    for (let i = 0; i < this.props.arr.length; i++) {
-      if (this.props.arr[i] != nextProps.arr[i]) {
-        return true;
-      }
-    }
-    if (this.props.arrowPositions.length != nextProps.arrowPositions.length) {
-      return true;
-    }
-    for (let i = 0; i < this.props.arrowPositions.length; i++) {
-      if (this.props.arrowPositions[i] != nextProps.arrowPositions[i]) {
-        return true;
-      }
-    }
-    if (this.props.comments.length != nextProps.comments.length) {
-      return true;
-    }
-    for (let i = 0; i < this.props.comments.length; i++) {
-      if (this.props.comments[i] != nextProps.comments[i]) {
-        return true;
-      }
-    }
-    if (this.state.arrows.length != nextState.arrows.length) {
-      return true;
-    }
-    for (let i = 0; i < this.state.arrows.length; i++) {
-      if (
-        this.state.arrows[i].start != nextState.arrows[i].start ||
-        this.state.arrows[i].end != nextState.arrows[i].end
-      ) {
-        return true;
-      }
-    }
-    return false;
   }
 
   updateArrowsPosition() {

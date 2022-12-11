@@ -1,213 +1,140 @@
-import React, { ReactPropTypes } from "react";
+import React, { ReactPropTypes, useEffect, useState } from "react";
 import { IArrayElement } from "../tools/interfaces";
 import { parseRawStringArray } from "../tools/parser";
 import ArrayVisualizer from "./ArrayVisualizer";
 import "./css/BubbleSort.css";
 
 const testArray = "[9, 7, 3, 2, -2, -9]";
+const parsedArray = JSON.parse(testArray) as Array<number>;
 
-interface IBubbleSortProps {}
-interface IBubbleSortState {
-  indexInsertSort: number;
-  bubbleNumber: number;
-  bubbleNeeded: number;
-  arrayRawInput: string;
-  array: Array<number>;
-  reachedEnd: Boolean;
-  highlightedArray: Array<IArrayElement>;
-}
+function BubbleSort() {
+  const [indexInsertSort, setIndexInsertSort] = useState(0);
+  const [bubbleNumber, setBubbleNumber] = useState(0);
+  const [arrayRawInput, setArrayRawInput] = useState("");
+  const [array, setArray] = useState(parsedArray as Array<number>);
+  const [bubbleNeeded, setBubbleNeeded] = useState(parsedArray.length - 1);
+  const [reachedEnd, setReachedEnd] = useState(false);
 
-class BubbleSort extends React.Component<IBubbleSortProps, IBubbleSortState> {
-  constructor(props: ReactPropTypes) {
-    super(props);
-    this.state = {
-      indexInsertSort: 0,
-      bubbleNumber: 0,
-      bubbleNeeded: 0,
-      arrayRawInput: "", // components updates each time the user types in the input, which is useless
-      array: [],
-      reachedEnd: false,
-      highlightedArray: [],
-    };
-    this.end = this.end.bind(this);
-    this.next = this.next.bind(this);
-    this.submit = this.submit.bind(this);
-    this.reset = this.reset.bind(this);
-    this.changeArrayInput = this.changeArrayInput.bind(this);
-  }
-  componentDidMount(): void {
-    let arr = JSON.parse(testArray);
-    this.setState({
-      array: arr,
-      bubbleNeeded: arr.length - 1,
-    });
-  }
-  componentDidUpdate(
-    prevProps: Readonly<IBubbleSortProps>,
-    prevState: Readonly<IBubbleSortState>,
-    snapshot?: any
-  ): void {
-    if (
-      prevState.reachedEnd !=
-      (this.state.bubbleNeeded === this.state.bubbleNumber)
-    ) {
-      this.setState({
-        reachedEnd: this.state.bubbleNeeded === this.state.bubbleNumber,
-      });
+  useEffect(() => {
+    if (reachedEnd != (bubbleNeeded == bubbleNumber)) {
+      setReachedEnd(bubbleNeeded == bubbleNumber);
     }
-  }
-  next() {
-    if (this.state.bubbleNeeded === this.state.bubbleNumber) {
+  });
+
+  function next() {
+    // button trigger
+    if (reachedEnd) {
       return;
     }
-    let newArray = this.state.array.slice();
-    if (
-      this.state.array[this.state.indexInsertSort] >
-      this.state.array[this.state.indexInsertSort + 1]
-    ) {
-      newArray[this.state.indexInsertSort] =
-        this.state.array[this.state.indexInsertSort + 1];
-      newArray[this.state.indexInsertSort + 1] =
-        this.state.array[this.state.indexInsertSort];
+    let newArray = array.slice();
+    if (array[indexInsertSort] > array[indexInsertSort + 1]) {
+      newArray[indexInsertSort] = array[indexInsertSort + 1];
+      newArray[indexInsertSort + 1] = array[indexInsertSort];
     }
-    this.setState(function (state) {
-      if (
-        state.indexInsertSort + 1 >=
-        state.array.length - 1 - state.bubbleNumber
-      ) {
-        return {
-          indexInsertSort: 0,
-          bubbleNumber: state.bubbleNumber + 1,
-          array: newArray,
-        };
-      }
-      return {
-        indexInsertSort: state.indexInsertSort + 1,
-        bubbleNumber: state.bubbleNumber,
-        array: newArray,
-      };
-    });
-  }
-  end() {
-    if (this.state.bubbleNeeded == this.state.bubbleNumber) {
-      return;
-    }
-    let newArray = this.state.array.slice();
-    newArray.sort((a, b) => a - b);
-
-    this.setState(function (state) {
-      return {
-        bubbleNumber: state.bubbleNeeded,
-        array: newArray,
-        indexInsertSort: 0,
-      };
-    });
-  }
-  reset() {
-    let arr = JSON.parse(testArray);
-    this.setState({
-      array: JSON.parse(testArray),
-      bubbleNeeded: arr.length - 1,
-      bubbleNumber: 0,
-      indexInsertSort: 0,
-    });
-  }
-  submit() {
-    let arr = parseRawStringArray(this.state.arrayRawInput);
-    this.setState({
-      bubbleNeeded: arr.length - 1,
-      indexInsertSort: 0,
-      bubbleNumber: 0,
-      array: arr,
-    });
-  }
-  changeArrayInput(e: React.FormEvent<HTMLInputElement>) {
-    this.setState({
-      arrayRawInput: e.currentTarget.value,
-    });
-  }
-  render(): React.ReactNode {
-    let comment =
-      "Bubble Number: " +
-      this.state.bubbleNumber +
-      " / " +
-      this.state.bubbleNeeded;
-
-    // arrow position
-    let arrowPosition = [] as Array<number>;
-    if (
-      this.state.array[this.state.indexInsertSort] >
-      this.state.array[this.state.indexInsertSort + 1]
-    ) {
-      arrowPosition = [
-        this.state.indexInsertSort,
-        this.state.indexInsertSort + 1,
-      ];
+    if (indexInsertSort + 1 >= array.length - 1 - bubbleNumber) {
+      setIndexInsertSort(0);
+      setBubbleNumber((bubbleNumber) => bubbleNumber + 1);
     } else {
-      arrowPosition = [];
+      setIndexInsertSort((indexInsertSort) => indexInsertSort + 1);
     }
-
-    // highlighted array (array with some more information)
-    let hArray = [] as Array<IArrayElement>;
-    for (let i = 0; i < this.state.array.length; i++) {
-      hArray.push({
-        value: this.state.array[i],
-        highlighted:
-          this.state.bubbleNumber < this.state.bubbleNeeded &&
-          (i === this.state.indexInsertSort ||
-            i === this.state.indexInsertSort + 1),
-      });
-    }
-
-    return (
-      <React.Fragment>
-        <div className="buttons">
-          <button onClick={this.next} id="next" className="bottom-button">
-            Next
-          </button>
-          <button onClick={this.end} id="end" className="bottom-button">
-            End
-          </button>
-          <button onClick={this.reset} id="reset" className="bottom-button">
-            Reset
-          </button>
-        </div>
-        <div className="input-arr">
-          <span className="input-title">Input Array :</span>
-
-          <input
-            type="text"
-            className="input-array"
-            placeholder="9, 7, 3, 2, -2, -9"
-            required
-            onChange={this.changeArrayInput}
-            value={this.state.arrayRawInput}
-          />
-
-          <button
-            type="submit"
-            className="submit-button"
-            onClick={this.submit}
-            id="submit-button"
-          >
-            Submit
-          </button>
-        </div>
-        <div className="array-vi">
-          <ArrayVisualizer
-            name="Bubble Sort"
-            arr={hArray}
-            arrowPositions={arrowPosition.length == 0 ? [] : [arrowPosition]}
-            highlightedSquares={[
-              this.state.indexInsertSort,
-              this.state.indexInsertSort + 1,
-            ]}
-            comments={[comment]}
-          />
-        </div>
-      </React.Fragment>
-    );
+    setArray(newArray);
   }
+
+  function end() {
+    // button trigger
+    if (reachedEnd) {
+      return;
+    }
+    let newArray = array.slice();
+    newArray.sort((a, b) => a - b);
+    setArray(newArray);
+    setIndexInsertSort(0);
+    setBubbleNumber(bubbleNeeded);
+  }
+
+  function reset() {
+    // button trigger
+    setArray(parsedArray);
+    setBubbleNeeded(parsedArray.length - 1);
+    setBubbleNumber(0);
+    setIndexInsertSort(0);
+  }
+
+  function submit() {
+    // button trigger
+    let arr = parseRawStringArray(arrayRawInput);
+    setArray(arr);
+    setBubbleNeeded(arr.length - 1);
+    setIndexInsertSort(0);
+    setBubbleNumber(0);
+  }
+  let comment = "Bubble Number: " + bubbleNumber + " / " + bubbleNeeded;
+
+  // arrow position
+  let arrowPosition = [] as Array<number>;
+  if (array[indexInsertSort] > array[indexInsertSort + 1]) {
+    arrowPosition = [indexInsertSort, indexInsertSort + 1];
+  } else {
+    arrowPosition = [];
+  }
+
+  // highlighted array (array with some more information)
+  let hArray = [] as Array<IArrayElement>;
+  for (let i = 0; i < array.length; i++) {
+    hArray.push({
+      value: array[i],
+      highlighted:
+        bubbleNumber < bubbleNeeded &&
+        (i === indexInsertSort || i === indexInsertSort + 1),
+    });
+  }
+  return (
+    <React.Fragment>
+      <div className="buttons">
+        <button onClick={next} id="next" className="bottom-button">
+          Next
+        </button>
+        <button onClick={end} id="end" className="bottom-button">
+          End
+        </button>
+        <button onClick={reset} id="reset" className="bottom-button">
+          Reset
+        </button>
+      </div>
+      <div className="input-arr">
+        <span className="input-title">Input Array :</span>
+
+        <input
+          type="text"
+          className="input-array"
+          placeholder="9, 7, 3, 2, -2, -9"
+          required
+          onChange={(e) => {
+            setArrayRawInput(e.currentTarget.value);
+          }}
+          value={arrayRawInput}
+        />
+
+        <button
+          type="submit"
+          className="submit-button"
+          onClick={submit}
+          id="submit-button"
+        >
+          Submit
+        </button>
+      </div>
+      <div className="array-vi">
+        <ArrayVisualizer
+          name="Bubble Sort"
+          arr={hArray}
+          arrowPositions={arrowPosition.length == 0 ? [] : [arrowPosition]}
+          highlightedSquares={[indexInsertSort, indexInsertSort + 1]}
+          comments={[comment]}
+        />
+      </div>
+    </React.Fragment>
+  );
 }
 
 export default BubbleSort;

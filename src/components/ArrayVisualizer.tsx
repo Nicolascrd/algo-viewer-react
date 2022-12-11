@@ -1,4 +1,4 @@
-import React, { RefAttributes, useRef } from "react";
+import React, { RefAttributes, useEffect, useRef, useState } from "react";
 import ArrowsArray from "./ArrowsArray";
 import { IArrayElement, IArrow } from "../tools/interfaces";
 import "./css/ArrayVisualizer.css";
@@ -15,54 +15,33 @@ interface IPosition {
   right: number;
   bottom: number;
 }
-interface IArrayVisualizerState {
-  arrows: Array<IArrow>;
-}
-interface IArrayVisualizerRefs {}
 
 const arrayElID = "array-el-";
 const standardHeight = 15;
 
-class ArrayVisualizer extends React.Component<
-  IArrayVisualizerProps,
-  IArrayVisualizerState
-> {
-  private refArrayCont: React.RefObject<HTMLInputElement>;
+function ArrayVisualizer(props: IArrayVisualizerProps) {
+  const refArrayCont = useRef<HTMLInputElement>(null);
 
-  constructor(props: IArrayVisualizerProps) {
-    super(props);
-    this.state = {
-      arrows: [],
-    };
-    this.refArrayCont = React.createRef();
-    this.updateArrowsPosition = this.updateArrowsPosition.bind(this);
-    this.generateArrowPosition = this.generateArrowPosition.bind(this);
-  }
+  const [arrows, setArrows] = useState([] as Array<IArrow>);
 
-  componentDidMount(): void {
-    this.updateArrowsPosition();
-  }
-  componentDidUpdate(prevProps: IArrayVisualizerProps): void {
-    const p = this.props;
-    if (this.props != prevProps) {
-      this.updateArrowsPosition();
-    }
-  }
+  useEffect(() => {
+    updateArrowsPosition(props);
+  }, [props]);
 
-  updateArrowsPosition() {
-    if (!this.props.arrowPositions) {
+  function updateArrowsPosition(props: IArrayVisualizerProps) {
+    if (!props.arrowPositions) {
       return;
     }
-    if (this.refArrayCont.current == undefined) {
+    if (refArrayCont.current == undefined) {
       return;
     }
-    let leftShift = this.refArrayCont.current.getBoundingClientRect().left;
+    let leftShift = refArrayCont.current.getBoundingClientRect().left;
     if (leftShift == undefined) {
       return;
     }
     let bp = [] as Array<IPosition>;
-    for (let i = 0; i < this.refArrayCont.current.children.length; i++) {
-      let rect = this.refArrayCont.current.children[i].getBoundingClientRect();
+    for (let i = 0; i < refArrayCont.current.children.length; i++) {
+      let rect = refArrayCont.current.children[i].getBoundingClientRect();
       if (!rect) {
         return;
       }
@@ -73,17 +52,17 @@ class ArrayVisualizer extends React.Component<
       });
     }
     const res: Array<IArrow> = [];
-    if (this.props.arrowPositions == undefined) {
+    if (props.arrowPositions == undefined) {
       return;
     }
-    this.props.arrowPositions.forEach((element, index) => {
+    props.arrowPositions.forEach((element, index) => {
       if (element.length != 2) {
         console.error(
           `Arrow position array should be of length 2 but has length ${element.length} at position ${index}`
         );
         return;
       }
-      let arrPos = this.generateArrowPosition(
+      let arrPos = generateArrowPosition(
         standardHeight * (index + 1),
         element,
         bp
@@ -92,12 +71,10 @@ class ArrayVisualizer extends React.Component<
         res.push(arrPos);
       }
     });
-    this.setState({
-      arrows: res,
-    });
+    setArrows(res);
   }
 
-  generateArrowPosition(
+  function generateArrowPosition(
     height: number,
     arr: Array<number>,
     bp: Array<IPosition>
@@ -137,47 +114,35 @@ class ArrayVisualizer extends React.Component<
       height: height,
     } as IArrow;
   }
-
-  render() {
-    let arrayJSX = this.props.arr.map((el, ind) => {
-      return (
-        <div
-          key={ind}
-          id={arrayElID + String(ind)}
-          className={
-            "array-el " + (el.highlighted ? "highlighted-array-el" : "")
-          }
-        >
-          <div className="indice">{ind}</div>
-          <div className="internal-data">{el.value}</div>
-        </div>
-      );
-    });
-    let commentsJSX = this.props.comments.map((com) => (
-      <div key={com}>{com}</div>
-    ));
-
+  let arrayJSX = props.arr.map((el, ind) => {
     return (
-      <React.Fragment>
-        <h2>{this.props.name ? this.props.name : "Array Visualizer"}</h2>
-        <div>
-          <div
-            className="array-container"
-            id="array-cont"
-            ref={this.refArrayCont}
-          >
-            {arrayJSX}
-          </div>
-          <div className="svg-container" v-if="arrows.length">
-            <ArrowsArray arrows={this.state.arrows} />
-          </div>
-          {this.props.comments && (
-            <div className="comments-container">{commentsJSX}</div>
-          )}
-        </div>
-      </React.Fragment>
+      <div
+        key={ind}
+        id={arrayElID + String(ind)}
+        className={"array-el " + (el.highlighted ? "highlighted-array-el" : "")}
+      >
+        <div className="indice">{ind}</div>
+        <div className="internal-data">{el.value}</div>
+      </div>
     );
-  }
+  });
+  let commentsJSX = props.comments.map((com) => <div key={com}>{com}</div>);
+  return (
+    <React.Fragment>
+      <h2>{props.name ? props.name : "Array Visualizer"}</h2>
+      <div>
+        <div className="array-container" id="array-cont" ref={refArrayCont}>
+          {arrayJSX}
+        </div>
+        <div className="svg-container" v-if="arrows.length">
+          <ArrowsArray arrows={arrows} />
+        </div>
+        {props.comments && (
+          <div className="comments-container">{commentsJSX}</div>
+        )}
+      </div>
+    </React.Fragment>
+  );
 }
 
 export default ArrayVisualizer;

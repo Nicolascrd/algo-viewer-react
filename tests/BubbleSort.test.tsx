@@ -38,7 +38,6 @@ describe("Input new array works", () => {
     fireEvent.change(input, { target: { value: "1, 2, 3" } });
     for (let b of buttons) {
       if (b.innerHTML == "Submit") {
-        console.log("click");
         userEvent.click(b);
       }
     }

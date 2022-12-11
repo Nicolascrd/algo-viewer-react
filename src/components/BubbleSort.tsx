@@ -7,7 +7,7 @@ import "./css/BubbleSort.css";
 const testArray = "[9, 7, 3, 2, -2, -9]";
 const parsedArray = JSON.parse(testArray) as Array<number>;
 
-function BubbleSortHook() {
+function BubbleSort() {
   const [indexInsertSort, setIndexInsertSort] = useState(0);
   const [bubbleNumber, setBubbleNumber] = useState(0);
   const [arrayRawInput, setArrayRawInput] = useState("");
@@ -137,4 +137,4 @@ function BubbleSortHook() {
   );
 }
 
-export default BubbleSortHook;
+export default BubbleSort;
